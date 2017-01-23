@@ -2,6 +2,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const config = require('./resources/config');
+const chatSession = require('./routes/chatSession');
+const index = require('./routes/index');
 
 global.rootdir = __dirname;
 let app = express();
@@ -13,7 +15,8 @@ app.use(bodyParser.urlencoded({
     extended : true,
     parameterLimit : 50000
 }));
-require('./routes/index').init(app,express);
+chatSession.startSession(app);
+index.init(app,express);
 // catch 404 and forward to error handler （400请求错误处理）
 app.use((req, res, next) => {
     let err = new Error('Not Found');
