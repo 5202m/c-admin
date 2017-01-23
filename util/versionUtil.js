@@ -1,19 +1,21 @@
-﻿var fs = require('fs');
+﻿const fs = require('fs');
+const path = require('path');
 /**
  * 版本号
  * create by alan.wu
  * 2016-9-7
  */
-var versionUtil = {
+let versionUtil = {
     /**
      * 提取版本
      */
-   getVersion:function(){
-        var vNo='';
+   getVersion(){
+        let vNo='';
+        let versionFilePath = path.join(__dirname, '../views', 'version.json');
         try{
-            vNo=fs.readFileSync(global.rootdir+'/template/version.json', 'utf8');
+            vNo=fs.readFileSync(versionFilePath, 'utf8');
         }catch(e){
-            console.log("read the version file fail,please check it!");
+            console.log(`read the version file fail from path ${versionFilePath},please check it!`);
         }
         return JSON.parse(vNo).version;
    }
