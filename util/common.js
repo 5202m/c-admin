@@ -621,6 +621,21 @@ var common = {
     isNumber:function(obj) {
         return typeof obj === 'number' && !isNaN(obj)
     },
+    Deferred: function () {
+        var _resolve;
+        var _reject;
+        this.promise = new Promise(function (resolve, reject) {
+                _resolve = resolve;
+                _reject = reject;
+            }
+                .bind(this));
+        this.resolve = function (value) {
+            _resolve.call(this.promise, value);
+        };
+        this.reject = function (value) {
+            _reject.call(this.promise, value);
+        };
+    },
     /**
      * 通过不同host格式连接
      * @param host
