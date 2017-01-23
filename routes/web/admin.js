@@ -8,6 +8,7 @@ var request = require('request');
 var constant = require('../../constant/constant');//引入constant
 var config = require('../../resources/config');//引入config
 var common = require('../../util/common');//引入common
+var errorMessage = require('../../util/errorMessage');//引入common
 var adminService = require('../../service/adminService.js');//引入adminService
 var studioService = require('../../service/studioService');//引入studioService
 var userService = require('../../service/userService');//引入userService
@@ -90,7 +91,7 @@ router.get('/room',function(req, res){
             },
             function(err, results) {
                 if(results.checkResult!=null && !results.checkResult.isOK){
-                    res.render('error',{error: '您缺少访问权限，请联系管理员！'});
+                    res.render('error', errorMessage.code_12);
                 }else{
                     if(results.checkResult!=null){
                         viewDataObj.userInfo = JSON.stringify(userInfo);
@@ -98,7 +99,7 @@ router.get('/room',function(req, res){
                         viewDataObj.groupType = groupType;
                     }
                     if(results.getGroup){
-                        viewDataObj.groupInfo=results.getGroup.toObject();
+                        viewDataObj.groupInfo=results.getGroup;
                         viewDataObj.groupInfo.allowWhisper=common.containSplitStr(viewDataObj.groupInfo.talkStyle,1);
                     }
                     viewDataObj.nickname=userInfo.nickname;
@@ -109,7 +110,7 @@ router.get('/room',function(req, res){
                 }
          });
     }else{
-        res.render('error',{error: '您未登录，请登录后访问'});
+        res.render('error', errorMessage.code_11);
     }
 });
 
