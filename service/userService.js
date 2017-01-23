@@ -241,8 +241,9 @@ var userService = {
         }
         logger.info("checkSystemUserInfo=>newUserInfo:"+JSON.stringify(newUserInfo));
         userService.createUser(newUserInfo).then(result => {
-            result.isOK=true;
-            callback(result);
+			if(result === true){
+				callback({isOK: true});
+			}
         }).catch(err => {
             logger.error("checkSystemUserInfo=>createUser:"+ err);
         });

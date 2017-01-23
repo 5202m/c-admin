@@ -6,18 +6,6 @@ let logger = require('../resources/logConf').getLogger("liveRoomAPIService");
 
 const baseUrl = config.pmApiUrl;
 
-let addCompanyIdToPath = path => {
-    let companIdParam = "companyId=" + config.companyId;
-    let params = path.split("?")[1];
-    path += params ? "&" + companIdParam : "?" + companIdParam;
-    return path;
-};
-
-let addCompanyIdToBody = body => {
-    body.companyId = config.companyId;
-    return body;
-}
-
 let doRequestSuccess = data => {
     let dataObj = {};
     try {
@@ -44,7 +32,6 @@ let doRequestSuccess = data => {
 
 let pmAPI = {
     get : (path, callback) => {
-	path = addCompanyIdToPath(path);
 	logger.info("Getting data from liveRoom API with path: " + path);
 	let defer = new Deferred();
 	request(baseUrl + path, (err, res, data) => {
@@ -61,7 +48,6 @@ let pmAPI = {
 	return defer.promise;
     },
     post : (path, data, callback) => {
-	data = addCompanyIdToBody(data);
 	logger.info("Posting data to liveRoom API with path: " + path);
 	let defer = new Deferred();
 	request.post({
