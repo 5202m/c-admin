@@ -14,7 +14,7 @@
       <script type="text/javascript" src="/base/lib/My97DatePicker/WdatePicker.js"></script>
   </head>
   <body>
-  <audio id="tipsound" src="/admin/audio/2.mp3">您的浏览器不支持 audio 标签。</audio>
+  <audio id="tipsound" src="/audio/2.mp3">您的浏览器不支持 audio 标签。</audio>
     <div calss="main">
         <div class="window-content open_wh_box dn" style="position: absolute;z-index: 10000;top: 10px;width:650px;height:550px;left:20%;">
             <div class="box_title"><stong style="float:left;">私聊框</stong><span style="float:right;"><stong class="openWhBoxBtn btn">关闭</stong><stong style="margin-left:10px;"></stong></span></div>
@@ -115,7 +115,7 @@
                             <div><span class="nk">老师暂未上线</span></div>
                         </div>
                         <div class="te_r">
-                            <div class="video_icon"><a href="javascript:" class="open-video"><img src="/admin/img/u50.jpg"/></a></div>
+                            <div class="video_icon"><a href="javascript:" class="open-video"><img src="/images/u50.jpg"/></a></div>
                             <% if (userType=='2') { %>
                                 <div>
                                     <input type="button" id="publish_point" class="viewpoint dn btn" value="发布观点" />
@@ -251,26 +251,53 @@
     </div>
     <script type="text/javascript" src="/base/lib/store.min.js"></script>
     <script type="text/javascript" src="/base/lib/basket.min.js"></script>
+    <%if(isDevTest) {%>
+        <script type="text/javascript" src="/base/lib/jquery-1.11.0.min.js"></script>
+        <script type="text/javascript" src="/base/lib/mScroll/jquery.mCustomScrollbar.concat.min.js"></script>
+        <script type="text/javascript" src="/base/lib/lightbox/lightbox.min.js"></script>
+        <script type="text/javascript" src="/base/lib/socket.io.js"></script>
+        <script type="text/javascript" src="/base/lib/paste.js"></script>
+        <script type="text/javascript" src="/base/lib/pnotify/pnotify.custom.min.js"></script>
+        <script type="text/javascript" src="/base/lib/jqueryUI/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="/base/lib/jquery.face.js"></script>
+        <script type="text/javascript" src="/base/lib/ueditor/ueditor.config.js"></script>
+        <script type="text/javascript" src="/base/lib/ueditor/ueditor.all.min.js"></script>
+        <script type="text/javascript" src="/base/lib/ueditor/lang/zh-cn/zh-cn.js"></script>
+        <script type="text/javascript" src="/base/lib/dateTimeWeek/dateTimeWeek.js"></script>
+        <script type="text/javascript" src="/base/util/common.js"></script>
+        <script type="text/javascript" src="/base/util/chatAnalyze.js"></script>
+        <script type="text/javascript" src="/javascripts/room.js"></script>
+        <script type="text/javascript">
+            $(function(){
+                pageFun();
+            });
+        </script>
+    <%} else{ %>
+        <script type="text/javascript">
+            basket.version='<%=version%>';
+            basket.require(
+                    {url: "/base/lib/jquery-1.11.0.min.js"},
+                    {url: "/base/lib/mScroll/jquery.mCustomScrollbar.concat.min.js"},
+                    {url: "/base/lib/lightbox/lightbox.min.js"},
+                    {url: "/base/lib/socket.io.js"},
+                    {url: "/base/lib/paste.js"},
+                    {url: "/base/lib/pnotify/pnotify.custom.min.js"},
+                    {url: "/base/lib/jqueryUI/jquery-ui.min.js"},
+                    {url: "/base/lib/jquery.face.js"},
+                    {url: "/base/lib/ueditor/ueditor.config.js"},
+                    {url: "/base/lib/ueditor/ueditor.all.min.js"},
+                    {url: "/base/lib/ueditor/lang/zh-cn/zh-cn.js"},
+                    {url: "/base/lib/dateTimeWeek/dateTimeWeek.js"},
+                    {url: "/base/util/common.min.js"},
+                    {url: "/javascripts/room.min.js?v=<%=version%>"},
+            function() {//ie版本不做本地缓存操作
+                    pageFun();
+            }).then(function () {
+                pageFun();
+            });
+        </script>
+    <%}%>
     <script type="text/javascript">
-        basket.version='<%=version%>';
-        basket.require(
-                {url: "/base/lib/jquery-1.11.0.min.js"},
-                {url: "/base/lib/mScroll/jquery.mCustomScrollbar.concat.min.js"},
-                {url: "/base/lib/lightbox/lightbox.min.js"},
-                {url: "/base/lib/socket.io.js"},
-                {url: "/base/lib/paste.js"},
-                {url: "/base/lib/pnotify/pnotify.custom.min.js"},
-                {url: "/base/lib/jqueryUI/jquery-ui.min.js"},
-                {url: "/base/lib/jquery.face.js"},
-                {url: "/base/lib/ueditor/ueditor.config.js"},
-                {url: "/base/lib/ueditor/ueditor.all.min.js"},
-                {url: "/base/lib/ueditor/lang/zh-cn/zh-cn.js"},
-                {url: "/base/lib/dateTimeWeek/dateTimeWeek.js"},
-                <% if(isDevTest) { %>{url:"/base/util/common.js",skipCache:true},{url:"/base/util/chatAnalyze.js",skipCache:true},{url:"/javascripts/room.js",skipCache:true}<% }else{ %>{url:"/base/util/common.min.js"},{url:"/javascripts/room.min.js?v=<%=version%>"}<%}%>,function() {//ie版本不做本地缓存操作
-                 pageFun();
-        }).then(function () {
-            pageFun();
-        });
         function pageFun(){
             room.filePath='<%= filePath%>';
             room.apiUrl='<%= apiUrl%>';
