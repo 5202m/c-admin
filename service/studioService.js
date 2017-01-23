@@ -359,50 +359,7 @@ var studioService = {
     	 });
     	 return deferred.promise;
     },
-    /**
-     * 通过手机号码检测客户组
-     * @param mobilePhone
-     * @param clientGroup
-     * @param callback
-     */
-    upgradeClientGroup: (groupType,mobilePhone,clientGroup,callback) => {
-        var apiService = require('../service/'+common.getTempPlatformKey(groupType)+'ApiService');//引入ApiService
-        if(clientGroup === constant.clientGroup.active || clientGroup === constant.clientGroup.notActive ) {
-            //升级到真实
-            apiService.checkAClient({mobilePhone:mobilePhone,isCheckByMobile:true}, function (result) {
-                console.log("checkAClient->flagResult:" + JSON.stringify(result));
-                if(result.flag == 2 || result.flag == 3){
-                    var clientGroupTmp = result.flag == 2 ? constant.clientGroup.notActive : constant.clientGroup.active;
-                    studioService.updateClientGroup(groupType,mobilePhone, clientGroupTmp, result.accountNo, function (isOk) {
-                        if (isOk) {
-                            callback(true, clientGroupTmp);
-                        }else{
-                            callback(false, null);
-                        }
-                    });
-                }else{
-                    callback(false, null);
-                }
-            });
-        }else if(clientGroup === constant.clientGroup.simulate){
-            //升级到模拟
-            apiService.checkSmClient(mobilePhone,function(hasRow){
-                if(hasRow){
-                    studioService.updateClientGroup(groupType,mobilePhone, constant.clientGroup.simulate, null, function(isOk){
-                        if(isOk){
-                            callback(true, constant.clientGroup.simulate);
-                        }else{
-                            callback(false, null);
-                        }
-                    });
-                }else{
-                    callback(false, null);
-                }
-            });
-        }else{
-            callback(false, null);
-        }
-    },
+    
     /**
      * 更新客户组别
      * @param mobilePhone
@@ -509,37 +466,6 @@ var studioService = {
                 callback(map);
             }
         });
-    },
-    /**
-     * 用户修改皮肤样式
-     * @param userInfo
-     * @param params
-     * @param callback
-     */
-    setUserGroupThemeStyle: (userInfo, params, callback) => {
-	if(typeof params == 'string'){
-	    params = JSON.parse(params);
-        }
-	 let deferred = new Deferred();
-	 let path = "/studio/setUserGroupThemeStyle";
-	 let paramBody = {
-		 userInfo: userInfo,
-		 defTemplate: params.defTemplate
-	 };
-	 
-	 liveRoomAPIService.post(path, paramBody).then((result) => {
-	     if(callback){
-		 callback(result);
-	     }
-	     deferred.resolve(result);
-	 }).catch((e) => {
-	     logger.error("setUserGroupThemeStyle! >>setUserGroupThemeStyle:", e);
-	     if(callback){
-		 callback(null);
-	     }
-	     deferred.reject(e);
-	 });
-	 return deferred.promise;
     },
     /**
      * 提取培训班列表

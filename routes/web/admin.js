@@ -25,7 +25,7 @@ router.get('/', function(req, res) {
     var viewDataObj = {isLogin:false};
     viewDataObj.isNw = isNw?isNw:false;
     viewDataObj.isDevTest=config.isDevTest;
-    var adminUserInfo = req.session.adminUserInfo;
+    var adminUserInfo = req.session ? req.session.adminUserInfo : null;
     if(adminUserInfo){
         var userId = adminUserInfo.userId;
         viewDataObj.teacher = adminUserInfo;

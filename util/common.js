@@ -6,40 +6,6 @@
 var config = require('../resources/config');//引入config
 var common = {
     /**
-     * render路径
-     * @param req
-     * @param platform
-     * @param themeKey
-     * @param view
-     * @returns {string}
-     */
-    renderPath:function(req,tempPlatform,view,themeKey){
-        var defTemp=null,baseUrl=req.baseUrl,tmpKey='';
-        for(var key in config.defTemplate){
-            defTemp=config.defTemplate[key];
-            if(defTemp.routeKey==baseUrl){
-                if(!themeKey){
-                    themeKey=defTemp[tempPlatform];
-                }
-                tmpKey=key;
-                break;
-            }
-        }
-        return global.rootdir+'/template/'+tmpKey+'/'+themeKey+'/view/'+(view?view:'index');
-    },
-    /**
-     * 提取模板平台对应key
-     * @param groupType
-     */
-    getTempPlatformKey:function(groupType){
-        var baseRoute='/'+groupType;
-        for(var key in config.defTemplate){
-            if(config.defTemplate[key].routeKey==baseRoute){
-                return key;
-            }
-        }
-    },
-    /**
      * 功能：删除数组中某个下标的元素
      */
     remove:function (arr,index) {
