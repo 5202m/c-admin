@@ -22,7 +22,10 @@ var config = {
     },//UTM系统信息
     isDevTest:true,//是否开发或测试环境
     sessionConfig:{key:'connect.sid',secret:'pm@chat'},//session 对应key,secret
-    pmApiUrl:'http://192.168.35.91:3000/api',//pmApi地址
+    redisUrlObj:{ host: '192.168.35.236', port: 6379 },	//链接redis缓存客户端连接
+    pmApiUrl:'http://localhost:3000/api',//pmApi地址
+    socketServerUrl:{webSocket:'http://192.168.35.81:3007',socketIO:'http://192.168.35.81:3007',apiSocket:'http://192.168.35.91:3007'},
+    chatSocketUrl:'http://192.168.35.81:3007',  //socket 服务api地址
     goldApiUrl: 'http://192.168.35.160/goldoffice_api/RESTful',//gwapi地址
     gwfxGTS2ApiUrl:'http://192.168.35.100:8083/Goldoffice_gateway_uat/RESTful',//外汇GTS2 Api地址
     gwfxGTS2SmApiUrl:'http://192.168.35.99:8080/Goldoffice_demo_api/RESTful',//外汇GTS2 模拟场 Api地址  真实地址:http://gts2apidemo.gwfx.com/Goldoffice_api
@@ -33,7 +36,6 @@ var config = {
     hxGTS2SmApiUrl:'http://192.168.35.99:8080/Goldoffice_demo_api/RESTful',//恒信GTS2 真实地址 http://gts2apidemo.hx9999.com/Goldoffice_api/RESTful
     hxMT4ApiUrl:'http://hxapi.hx9999.com',//恒信MT4 Api地址 http://hxapi.hx9999.com
     hxApiLoginSid:{apiLogin:'handan',apiPassword:'abc123'},
-    socketServerUrl:{webSocket:'http://127.0.0.1:3002',socketIO:'http://127.0.0.1:3003',apiSocket:'http://192.168.35.91:3007'},
     filesDomain: 'http://192.168.35.91:8090',//图片等文件访问域名
     web24kPath:'http://testweb1.24k.hk:8090',//24k信息地址
     pmOAPath:'http://testweb1.24k.hk:81',//http://www.24k.hk
