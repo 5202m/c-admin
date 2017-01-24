@@ -202,7 +202,10 @@ var room={
             return false;
         }
         sendObj.content = {msgType:room.msgType.text,value:msg};
-        room.socket.emit('sendMsg',sendObj);//发送数据
+        //room.socket.emit('sendMsg',sendObj);//发送数据
+        $.post(room.apiUrl+"/message/sendMsg",{data:sendObj},function(){
+            console.log("ok");
+        });
         room.setWhHistory(sendObj);
         room.setWhContent(sendObj,true,false);//直接把数据填入内容栏
         txtObj.html("");//清空内容
@@ -387,7 +390,24 @@ var room={
                         $(this).val("");
                     }, false);
                     //加载私聊信息
-                    room.socket.emit("getWhMsg",{userType:room.userInfo.userType,groupId:room.userInfo.groupId,groupType:room.userInfo.groupType,userId:room.userInfo.userId,toUser:{userId:userId,userType:userType}});
+                    //room.socket.emit("getWhMsg",{userType:room.userInfo.userType,groupId:room.userInfo.groupId,groupType:room.userInfo.groupType,userId:room.userInfo.userId,toUser:{userId:userId,userType:userType}});
+                    var whMsgObj = {
+                        userType: room.userInfo.userType,
+                        groupId: room.userInfo.groupId,
+                        groupType: room.userInfo.groupType,
+                        userId: room.userInfo.userId,
+                        toUser: {
+                            userId: userId,
+                            userType: userType
+                        }
+                    };
+                    $.post(
+                        room.apiUrl+"/message/getWhMsg",
+                        whMsgObj,
+                        function(){
+                            console.log("ok");
+                        }
+                    );
                 }else{
                     $("#"+whId).removeClass('dn');
                     room.setTalkListScroll(true,$('#'+whId+' .wh-content'),'dark');
@@ -753,30 +773,7 @@ var room={
                 room.setTalkListScroll(true);
             }
         });
-        //审核操作类事件
-        $("#approveAllHandler button").click(function(){
-            var idArr=[],fuIdArr=[];
-            $("#dialog_list .approve input:checked").each(function(){
-                var obj=$(this).parents("div");
-                idArr.push(obj.attr("id"));
-                var fObj=obj.attr("fuId");
-                var loc_isAdd = false;
-                for(var i = 0, lenI = fuIdArr.length; i < lenI; i++){
-                    if(fObj === fuIdArr[i]){
-                        loc_isAdd = true;
-                        break;
-                    }
-                }
-                if(!loc_isAdd){
-                    fuIdArr.push(fObj);
-                }
-            });
-            if(idArr.length==0){
-                alert("请选择聊天记录！");
-                return false;
-            }
-            room.socket.emit('approvalMsg',{fromUser:room.userInfo,status:$(this).attr("btnType"),publishTimeArr:idArr,fuIdArr:fuIdArr});
-        });
+        
         $("#approveCheckAll").click(function(){
             var isCheck=$(this).prop("checked");
             $("#dialog_list .approve input[type=checkbox]").each(function(){
@@ -891,7 +888,10 @@ var room={
                         $(".mymsg,.mymsg em").hide();
                     }
                     sendObj.fromUser.toUser = toUser;
-                    room.socket.emit('sendMsg', sendObj);//发送数据
+                    //room.socket.emit('sendMsg', sendObj);//发送数据
+                    $.post(room.apiUrl+"/message/sendMsg",{data:sendObj},function(){
+                        console.log("ok");
+                    });
                     room.setContent(sendObj, true, false);//直接把数据填入内容栏
                     //清空输入框
                     $("#whTxt").html("");//清空内容
@@ -1337,14 +1337,7 @@ var room={
         $('#'+fromUser.publishTime+' .txt_dia').click(function(){
             room.setDialog(null,$(this).attr("uid"),$(this).find("label").text(),0,$(this).attr("utype"));
         });
-        //审核按钮事件
-        $('#'+fromUser.publishTime + " .approve button").click(function(){
-            var idArr=[],fuIdArr=[];
-            var pObj=$(this).parents("div");
-            idArr.push(pObj.attr("id"));
-            fuIdArr.push(pObj.attr("fuId"));
-            room.socket.emit('approvalMsg',{fromUser:room.userInfo,status:$(this).attr("btnType"),publishTimeArr:idArr,fuIdArr:fuIdArr});
-        });
+        
         this.removeTalkMsg(fromUser.publishTime);//移除聊天记录
     },
     /**
@@ -1549,7 +1542,7 @@ var room={
         }else{
             aImgCls="user_c";
         }
-        return '<img src="/admin/img/'+aImgCls+'.png">';
+        return '<img src="/images/'+aImgCls+'.png">';
     },
     /**
      * 提取对话html
@@ -1717,7 +1710,16 @@ var room={
             //$(".loading-box").show();
             room.userInfo.socketId=room.socket.id;
             var currTab=$("#groupInfoId");
-            room.socket.emit('login',{userInfo:room.userInfo,lastPublishTime:$("#content_ul li:last").attr("id"),fUserTypeStr:currTab.attr("awr"), allowWhisper : currTab.attr("aw")});
+            //room.socket.emit('login',{userInfo:room.userInfo,lastPublishTime:$("#content_ul li:last").attr("id"),fUserTypeStr:currTab.attr("awr"), allowWhisper : currTab.attr("aw")});
+            var postData = {
+                userInfo: room.userInfo,
+                lastPublishTime: $("#content_ul li:last").attr("id"),
+                fUserTypeStr: currTab.attr("awr"),
+                allowWhisper: currTab.attr("aw")
+            };
+            $.post(room.apiUrl+"/message/join", postData, function(){
+                console.log("ok");
+            });
             $(".img-loading[pf=chatMessage]").show();
         });
         //进入聊天室加载的在线用户
