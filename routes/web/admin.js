@@ -3,20 +3,22 @@
  * Created by Jade.zhu on 2016/06/13.
  */
 var router =  require('express').Router();
-var async = require('async');//引入async
+var async = require('async');
 var request = require('request');
-var constant = require('../../constant/constant');//引入constant
-var config = require('../../resources/config');//引入config
-var common = require('../../util/common');//引入common
-var errorMessage = require('../../util/errorMessage');//引入common
-var adminService = require('../../service/adminService.js');//引入adminService
-var studioService = require('../../service/studioService');//引入studioService
-var userService = require('../../service/userService');//引入userService
-var baseApiService = require('../../service/baseApiService.js');//baseApiService
-var messageService = require('../../service/messageService');//引入messageService
-var chatService = require('../../service/chatService');//引入chatService
-var logger=require('../../resources/logConf').getLogger('admin');//引入log4js
-var versionUtil = require('../../util/versionUtil');//引入versionUtil
+var constant = require('../../constant/constant');
+var config = require('../../resources/config');
+var common = require('../../util/common');
+var errorMessage = require('../../util/errorMessage');
+var adminService = require('../../service/adminService.js');
+var studioService = require('../../service/studioService');
+var userService = require('../../service/userService');
+var baseApiService = require('../../service/baseApiService.js');
+var messageService = require('../../service/messageService');
+var chatService = require('../../service/chatService');
+var syllabusService = require('../../service/syllabusService');
+var visitorService = require('../../service/visitorService');
+var logger=require('../../resources/logConf').getLogger('admin');
+var versionUtil = require('../../util/versionUtil');
 
 /**
  * 聊天室后台页面入口
@@ -322,5 +324,161 @@ router.post('/getLastTwoDaysMsg', function(req, res){
     }
 });
 
+router.get('/getSyllabus', (req, res) => {
+    let groupType = req.query["groupType"] || "";
+    let groupId = req.query["groupId"] || "";
+    syllabusService.getSyllabus(groupType, groupId).then(result => {
+        res.json(result);
+    }).catch(e => {
+        logger.warn("getSyllabus error: ", e);
+        res.json(null);
+    });
+});
+
+router.get('/getVistiorByName', (req, res) => {
+    let groupType = req.query["groupType"] || "";
+    let groupId = req.query["groupId"] || "";
+    let nickname = req.query["nickname"] || "";
+
+    syllabusService.getSyllabus(
+        {
+            groupType: groupType,
+            groupId: groupId,
+            nickname: nickname
+        }
+    ).then(result => {
+        res.json(result);
+    }).catch(e => {
+        logger.warn("getSyllabus error: ", e);
+        res.json(null);
+    });
+});
+
+/**
+ * 加载大图数据
+ */
+router.get('/getBigImg', function(req, res) {
+    var publishTime=req.query["publishTime"],userId=req.query["userId"];
+    if(common.isBlank(publishTime)){
+        res.end("");
+    }else {
+        messageService.loadBigImg(userId,publishTime, function (bigImgData) {
+            if(common.isBlank(bigImgData)){
+                res.end("");
+            }else{
+                res.writeHead(200, {"Content-Type": "image/jpeg"});
+                res.end(new Buffer(bigImgData.replace(/^data:image.*base64,/,""),'base64'));
+            }
+        });
+    }
+});
+/**
+ * 上传数据
+ */
+router.post('/uploadData', function(req, res) {
+    var data = req.body;
+    if(data!=null && process.platform.indexOf("win")==-1){
+        //创建异常监控
+        var domain = require('domain').create();
+        domain.on('error', function(er){
+            logger.error("uploadImg fail,please check it",er);
+            res.json({success: false});
+        });
+        domain.run(function() {
+            //执行进程监控
+            process.nextTick(function() {
+                var imgUtil = require('../../util/imgUtil');//引入imgUtil
+                var val = data.content.value, needMax = data.content.needMax;
+                if (data.content.msgType == "img" && common.isValid(val)) {
+                        imgUtil.zipImg(val, 100, 60, function (minResult) {
+                            if(minResult.isOK){
+                                data.content.value = minResult.data;
+                                if (needMax == 1) {
+                                    imgUtil.zipImg(val, 0, 60, function (maxResult) {
+                                        if(maxResult.isOK){
+                                            data.content.maxValue = maxResult.data;
+                                            chatService.acceptMsg(data, null);
+                                        }
+                                        res.json({success: maxResult.isOK});
+                                    });
+                                } else {
+                                    chatService.acceptMsg(data, null);
+                                    res.json({success: minResult.isOK});
+                                }
+                            }else{
+                                res.json({success: minResult.isOK});
+                            }
+                        });
+                } else {
+                    res.json({success: false});
+                }
+            });
+        });
+    }else{
+        logger.warn("warn:please upload img by linux server!");
+        res.json({success:false});
+    }
+});
+
+/**
+ * 提取文档信息
+ *
+ */
+router.get('/getArticleList', function(req, res) {
+    var params={},userInfo = req.session.studioUserInfo;
+    params.code=req.query["code"];
+    params.platform=req.query["platform"];
+    params.pageNo=req.query["pageNo"];
+    params.isAll=req.query["isAll"] || "";
+    params.pageKey=req.query["pageKey"] || "";
+    params.pageLess=req.query["pageLess"] || "";
+    params.authorId=req.query["authorId"];
+    params.pageSize=req.query["pageSize"];
+    params.hasContent=req.query["hasContent"];
+    params.orderByStr=req.query["orderByStr"];
+    params.pageNo = common.isBlank(params.pageNo) ? 1 : params.pageNo;
+    params.pageSize = common.isBlank(params.pageSize) ? 15 : params.pageSize;
+    params.orderByStr = common.isBlank(params.orderByStr) ? "" : params.orderByStr;
+    var ids = req.query['ids']||'';
+    var callTradeIsNotAuth = 0, strategyIsNotAuth = 0;
+    if(params.code=='class_note') {
+        callTradeIsNotAuth = req.query['callTradeIsNotAuth'] || 0;
+        strategyIsNotAuth = req.query['strategyIsNotAuth'] || 0;
+    }
+    baseApiService.getArticleList(params,function(data){
+        if(data){
+            data = JSON.parse(data);
+            if(params.code=='class_note') {
+                var dataList = data.data, row = null;
+                for (var i in dataList) {
+                    row = dataList[i];
+                    var detailInfo = row.detailList && row.detailList[0];
+                    if (!common.containSplitStr(ids, row._id)) {
+                        if ((detailInfo.tag == 'shout_single' || detailInfo.tag == 'trading_strategy' || detailInfo.tag == 'resting_order')) {
+                            var remark = JSON.parse(detailInfo.remark), remarkRow = null;
+                            for (var j in remark) {
+                                remarkRow = remark[j];
+                                if(strategyIsNotAuth == 1){
+                                    remarkRow.open = '****';
+                                    remarkRow.profit = '****';
+                                    remarkRow.loss = '****';
+                                    remarkRow.description = '****';
+                                }
+                                remark[j] = remarkRow;
+                            }
+                            detailInfo.remark = JSON.stringify(remark);
+                        }
+                        row.detailList[0] = detailInfo;
+                        dataList[i] = row;
+                    }
+                }
+                data.data = dataList;
+            }
+            res.json(data);
+        }else{
+            res.json(null);
+        }
+    });
+});
 
 module.exports = router;
