@@ -23,7 +23,7 @@ var config = {
     isDevTest:true,//是否开发或测试环境
     sessionConfig:{key:'connect.sid',secret:'pm@chat'},//session 对应key,secret
     redisUrlObj:{ host: '192.168.35.236', port: 6379 },	//链接redis缓存客户端连接
-    pmApiUrl:'http://localhost:3000/api',//pmApi地址
+    pmApiUrl:'http://192.168.35.81:3000/api',//pmApi地址
     socketServerUrl:{webSocket:'http://192.168.35.81:3007',socketIO:'http://192.168.35.81:3007',apiSocket:'http://192.168.35.91:3007'},
     chatSocketUrl:'http://192.168.35.81:3007',  //socket 服务api地址
     goldApiUrl: 'http://192.168.35.160/goldoffice_api/RESTful',//gwapi地址
