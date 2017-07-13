@@ -1,23 +1,30 @@
-﻿"use strict";
-const express = require('express');
-const bodyParser = require('body-parser');
-const config = require('./resources/config');
-const chatSession = require('./routes/chatSession');
-const index = require('./routes/index');
+let express = require('express');
+const compression = require('compression');
+let path = require('path');
+let favicon = require('serve-favicon');
+let cookieParser = require('cookie-parser');
+let bodyParser = require('body-parser');
+
+let index = require('./routes/index');
+let chatSession = require('./routes/chatSession');
+let config = require('./resources/config');
+
+let app = express();
 
 global.rootdir = __dirname;
-let app = express();
-app.use(bodyParser.json({
-    limit : '50mb'
-})); // 最大传输量
-app.use(bodyParser.urlencoded({
-    limit : "50mb",
-    extended : true,
-    parameterLimit : 50000
-}));
+
+// uncomment after placing your favicon in /public
+app.use(favicon(path.join(__dirname, 'template', 'favicon.ico')));
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
+app.use(cookieParser());
+app.use(compression());
+
 chatSession.startSession(app);
-index.init(app,express);
-// catch 404 and forward to error handler （400请求错误处理）
+index.init(app, express);
+
+
+// error handler
 app.use((req, res, next) => {
     let err = new Error('Not Found');
     err.status = 404;
@@ -31,7 +38,6 @@ app.use((req, res, next) => {
     res.render('error', renderError);
 });
 app.use((err, req, res, next) => {
-  console.error("500错误", err);
     var newErr = new Error('Not Found');
     newErr.status = err.status || 500;
     res.status(newErr.status);
@@ -40,6 +46,7 @@ app.use((err, req, res, next) => {
         errcode: newErr.status
     };
     if(config.isDevTest){
+        console.error("500错误", err);
         renderError.err = err;
     }
     res.render('error', renderError);

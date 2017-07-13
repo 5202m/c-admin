@@ -44,5 +44,16 @@ class ChatService{
             });
         return defer.promise;
     }
+    sendNoticeArticle(groupId, article) {
+        let defer = new Deferred();
+        let path = "/chat/sendNoticeArticle";
+        liveRoomAPIService.post(path, {groupId: groupId, article: article}).then(data => {
+                defer.resolve(data);
+            }, function(err){
+                logger.error("sendNoticeArticle! >>sendNoticeArticle:", err);
+                defer.reject(err);
+            });
+        return defer.promise;
+    }
 }
 module.exports = new ChatService();

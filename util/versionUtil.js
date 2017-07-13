@@ -11,7 +11,7 @@ let versionUtil = {
      */
    getVersion(){
         let vNo='';
-        let versionFilePath = path.join(__dirname, '../views', 'version.json');
+        let versionFilePath = path.join(__dirname, '../template', 'version.json');
         try{
             vNo=fs.readFileSync(versionFilePath, 'utf8');
         }catch(e){

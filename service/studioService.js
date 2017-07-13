@@ -24,77 +24,77 @@ var studioService = {
      * @param dataCallback
      */
     getIndexLoadData: (userInfo,groupId,isGetRoomList,isGetSyllabus,isGetMember,callback) => {
-	 let deferred = new Deferred();
-	 let params = {
-		 userId: userInfo.userId,
-		 groupType: userInfo.groupType,
-		 groupId: groupId,
-		 isGetRoomList: isGetRoomList,
-		 isGetSyllabus: isGetSyllabus,
-		 isGetMember: isGetMember
-	 };
-	 let path = "/studio/getIndexLoadData";
-	 path += "?" + querystring.stringify(params);
-	 
-	 liveRoomAPIService.get(path).then((result) => {
-	     if(callback){
-		 callback(result);
-	     }
-	     deferred.resolve(result);
-	 }).catch((e) => {
-	     logger.error("getIndexLoadData! >>getIndexLoadData:", e);
-	     if(callback){
-		 callback(null);
-	     }
-	     deferred.reject(e);
-	 });
-	 return deferred.promise;
+		let deferred = new Deferred();
+		let params = {
+			userId: userInfo.userId,
+			groupType: userInfo.groupType,
+			groupId: groupId,
+			isGetRoomList: isGetRoomList,
+			isGetSyllabus: isGetSyllabus,
+			isGetMember: isGetMember
+		};
+		let path = "/studio/getIndexLoadData";
+		path += "?" + querystring.stringify(params);
+
+		liveRoomAPIService.get(path).then((result) => {
+			if(callback){
+			callback(result);
+			}
+			deferred.resolve(result);
+		}).catch((e) => {
+			logger.error("getIndexLoadData! >>getIndexLoadData:", e);
+			if(callback){
+			callback(null);
+			}
+			deferred.reject(e);
+		});
+		return deferred.promise;
     },
     /**
      * 提取房间列表
      * @param callback
      */
     getRoomList: (groupType,callback) => {
-	let deferred = new Deferred();
-	 let path = "/studio/getRoomList";
-	 path += "?groupType=" + groupType;
-	 
-	 liveRoomAPIService.get(path).then((result) => {
-	     if(callback){
-		 callback(result);
-	     }
-	     deferred.resolve(result);
-	 }).catch((e) => {
-	     logger.error("getRoomList! >>getRoomList:", e);
-	     if(callback){
-		 callback(null);
-	     }
-	     deferred.reject(e);
-	 });
-	 return deferred.promise;
+		let deferred = new Deferred();
+		let path = "/studio/getRoomList";
+		path += "?groupType=" + groupType;
+
+		liveRoomAPIService.get(path).then((result) => {
+			if(callback){
+			callback(result);
+			}
+			deferred.resolve(result);
+		}).catch((e) => {
+			logger.error("getRoomList! >>getRoomList:", e);
+			if(callback){
+			callback(null);
+			}
+			deferred.reject(e);
+		});
+		return deferred.promise;
     },
     /**
      * 提取客户组列表
      * @param callback
      */
     getClientGroupList: (groupType,callback) => {
-	 let deferred = new Deferred();
-	 let path = "/studio/getClientGroupList";
-	 path += "?groupType=" + groupType;
-	 
-	 liveRoomAPIService.get(path).then((result) => {
-	     if(callback){
-		 callback(result);
-	     }
-	     deferred.resolve(result);
-	 }).catch((e) => {
-	     logger.error("getClientGroupList! >>getClientGroupList:", e);
-	     if(callback){
-		 callback(null);
-	     }
-	     deferred.reject(e);
-	 });
-	 return deferred.promise;
+		let deferred = new Deferred();
+		let path = "/studio/getClientGroupList";
+		path += "?groupType=" + groupType;
+
+		liveRoomAPIService.get(path).then((result) => {
+			if(callback){
+			callback(result);
+			}
+			deferred.resolve(result);
+		}).catch((e) => {
+			logger.error("getClientGroupList! >>getClientGroupList:", e);
+			if(callback){
+			callback(null);
+			}
+			deferred.reject(e);
+		});
+		return deferred.promise;
     },
     /**
      * 重置密码
@@ -178,24 +178,24 @@ var studioService = {
      * @param clientGroup
      */
      getDefaultRoom: (groupType,clientGroup,callback) => {
-	 let deferred = new Deferred();
-	 let path = "/studio/getDefaultRoom";
-	 path += "?groupType=" + groupType;
-	 path += "&clientGroup=" + clientGroup;
-	 
-	 liveRoomAPIService.get(path).then((result) => {
-	     if(callback){
-		 callback(result);
-	     }
-	     deferred.resolve(result);
-	 }).catch((e) => {
-	     logger.error("getDefaultRoom! >>getDefaultRoom:", e);
-	     if(callback){
-		 callback(null);
-	     }
-	     deferred.reject(e);
-	 });
-	 return deferred.promise;
+		let deferred = new Deferred();
+		let path = "/studio/getDefaultRoom";
+		path += "?groupType=" + groupType;
+		path += "&clientGroup=" + clientGroup;
+		
+		liveRoomAPIService.get(path).then((result) => {
+			if(callback){
+			callback(result);
+			}
+			deferred.resolve(result);
+		}).catch((e) => {
+			logger.error("getDefaultRoom! >>getDefaultRoom:", e);
+			if(callback){
+			callback(null);
+			}
+			deferred.reject(e);
+		});
+		return deferred.promise;
      },
     /**
      * 直播间注册
@@ -293,7 +293,7 @@ var studioService = {
             if(callback){
 		 callback(result);
 	     }
-            deferred.reject(result);
+            deferred.resolve(result);
             return deferred.promise;
         }
         return userService.joinNewRoom({groupType:groupType,userId:userId,groupId:newGroupId, mobilePhone : mobilePhone},function(result){
@@ -307,8 +307,8 @@ var studioService = {
      */
     checkClientGroup: (mobilePhone,accountNo,platformKey,callback) => {
         var clientGroup=constant.clientGroup.register;
-        var apiService = require('../service/'+platformKey+'ApiService');//引入ApiService
-        apiService.checkAClient({mobilePhone:mobilePhone,accountNo:accountNo,ip:'',isCheckByMobile:true},function(result){
+        var apiService = require('../service/fxApiService');//引入ApiService
+        apiService.checkAClient({mobilePhone:mobilePhone,accountNo:accountNo,ip:'',isCheckByMobile:mobilePhone?true:false},function(result){
             console.log("checkAClient->flagResult:"+JSON.stringify(result));
             if(result.flag==2){
                 clientGroup=constant.clientGroup.notActive;
@@ -317,6 +317,7 @@ var studioService = {
                 clientGroup=constant.clientGroup.active;
                 callback(clientGroup, result.accountNo);
             }else{
+							if(common.isValid(mobilePhone)) {
                 //检查用户是否模拟用户
                 apiService.checkSmClient(mobilePhone,function(hasRow){
                     if(hasRow){
@@ -324,6 +325,9 @@ var studioService = {
                     }
                     callback(clientGroup);
                 });
+							}else{
+								callback(clientGroup, result.accountNo);
+							}
             }
         });
     },
@@ -359,7 +363,50 @@ var studioService = {
     	 });
     	 return deferred.promise;
     },
-    
+    /**
+     * 通过手机号码检测客户组
+     * @param mobilePhone
+     * @param clientGroup
+     * @param callback
+     */
+    upgradeClientGroup: (groupType,mobilePhone,clientGroup,callback) => {
+        var apiService = require('../service/fxApiService');//引入ApiService
+        if(clientGroup === constant.clientGroup.active || clientGroup === constant.clientGroup.notActive ) {
+            //升级到真实
+            apiService.checkAClient({mobilePhone:mobilePhone,isCheckByMobile:true}, function (result) {
+                console.log("checkAClient->flagResult:" + JSON.stringify(result));
+                if(result.flag == 2 || result.flag == 3){
+                    var clientGroupTmp = result.flag == 2 ? constant.clientGroup.notActive : constant.clientGroup.active;
+                    studioService.updateClientGroup(groupType,mobilePhone, clientGroupTmp, result.accountNo, function (isOk) {
+                        if (isOk) {
+                            callback(true, clientGroupTmp);
+                        }else{
+                            callback(false, null);
+                        }
+                    });
+                }else{
+                    callback(false, null);
+                }
+            });
+        }else if(clientGroup === constant.clientGroup.simulate){
+            //升级到模拟
+            apiService.checkSmClient(mobilePhone,function(hasRow){
+                if(hasRow){
+                    studioService.updateClientGroup(groupType,mobilePhone, constant.clientGroup.simulate, null, function(isOk){
+                        if(isOk){
+                            callback(true, constant.clientGroup.simulate);
+                        }else{
+                            callback(false, null);
+                        }
+                    });
+                }else{
+                    callback(false, null);
+                }
+            });
+        }else{
+            callback(false, null);
+        }
+    },
     /**
      * 更新客户组别
      * @param mobilePhone
@@ -466,6 +513,37 @@ var studioService = {
                 callback(map);
             }
         });
+    },
+    /**
+     * 用户修改皮肤样式
+     * @param userInfo
+     * @param params
+     * @param callback
+     */
+    setUserGroupThemeStyle: (userInfo, params, callback) => {
+	if(typeof params == 'string'){
+	    params = JSON.parse(params);
+        }
+	 let deferred = new Deferred();
+	 let path = "/studio/setUserGroupThemeStyle";
+	 let paramBody = {
+		 userInfo: userInfo,
+		 defTemplate: params.defTemplate
+	 };
+	 
+	 liveRoomAPIService.post(path, paramBody).then((result) => {
+	     if(callback){
+		 callback(result);
+	     }
+	     deferred.resolve(result);
+	 }).catch((e) => {
+	     logger.error("setUserGroupThemeStyle! >>setUserGroupThemeStyle:", e);
+	     if(callback){
+		 callback(null);
+	     }
+	     deferred.reject(e);
+	 });
+	 return deferred.promise;
     },
     /**
      * 提取培训班列表
