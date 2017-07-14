@@ -28,7 +28,7 @@ var config = {
     redisUrlObj: { host: '192.168.35.81', port: 6379 }, //链接redis缓存客户端连接
     isAllowCopyHomeUrl: true, //是否允许copy链接（针对微信进入聊天室）
     //    apiUrl:'http://192.168.35.91:3000/api',//pmApi地址
-    apiUrl: 'http://192.168.35.81:3004/api', //pmApi地址
+    apiUrl: 'http://192.168.35.81:3006/api', //pmApi地址
     //   apiUrl:'http://localhost:3000/api',//pmApi地址
     apiAuth: {
         appId: "fx_chat",

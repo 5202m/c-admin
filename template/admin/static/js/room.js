@@ -702,7 +702,7 @@ var room = {
     dataUpload: function(data) {
         //上传图片到后端
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'uploadData');
+        xhr.open('POST', '/uploadData');
         xhr.addEventListener("progress", function(e) {
             if (e.lengthComputable) {
                 var ra = ((e.loaded / e.total * 100) | 0) + "%";
