@@ -1647,7 +1647,7 @@ var room = {
         } else {
             aImgCls = "user_c";
         }
-        return '<img src="img/' + aImgCls + '.png">';
+        return '<img src="admin/img/' + aImgCls + '.png">';
     },
     /**
      * 提取对话html
