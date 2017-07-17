@@ -1343,7 +1343,7 @@ var room = {
             } else {
                 $("#userGagForm input[name='memberId']").val(nickname);
                 var data = room.getUserGagData();
-                data.set.type = 'visitor_filter';
+                data.set['type'] = 'visitor_filter';
                 $('.not-talk').addClass('dn');
                 room.setUserGag(data.set, data.visitor);
             }

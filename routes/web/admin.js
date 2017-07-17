@@ -205,7 +205,7 @@ router.post('/setUserGag', function(req, res) {
                     } else if (result.isIn) {
                         res.json({ isOK: false, msg: '禁言列表已存在该用户' });
                     } else {
-                        res.json({ isOK: false, msg: '禁言失败' });
+                        res.json({ isOK: false, msg: result.msg });
                     }
                 }
             });
@@ -214,7 +214,7 @@ router.post('/setUserGag', function(req, res) {
                 if (result) {
                     res.json({ isOK: true, msg: '' });
                 } else {
-                    res.json({ isOK: false, msg: '禁言失败' });
+                    res.json({ isOK: false, msg: result.msg });
                 }
             });
         }
