@@ -3,6 +3,7 @@
  * author Alan.wu
  */
 var room = {
+    companyId: '',
     filePath: '',
     apiUrl: '',
     nwIsMinimize: false, //标记nw窗口是否最小化
@@ -1161,7 +1162,7 @@ var room = {
                 $('.publish-note .publish-btn').prop('disabled', false);
                 return;
             }
-            var courseUrl = room.apiUrl + "/common/getCourse?companyId=fx&flag=S&groupType=" + room.userInfo.groupType + "&groupId=" + room.userInfo.groupId;
+            var courseUrl = room.apiUrl + "/common/getCourse?companyId="+room.companyId+"&flag=S&groupType=" + room.userInfo.groupType + "&groupId=" + room.userInfo.groupId;
             $.getJSON(courseUrl, function(data) {
                 if (data && data.result == "0" && data.data && data.data.length > 0 && !data.data[0].isNext) {
                     var course = data.data[0];

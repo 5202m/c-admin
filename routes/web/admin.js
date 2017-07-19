@@ -108,6 +108,7 @@ router.get('/room', function(req, res) {
                     viewDataObj.userType = userInfo.userType;
                     viewDataObj.socketUrl = JSON.stringify(common.formatHostUrl(req.hostname, config.socketServerUrl));
                     viewDataObj.isDevTest = config.isDevTest;
+                    viewDataObj.companyId = config.companyId;
                     res.render(global.rootdir + '/template/admin/view/room', viewDataObj);
                 }
             });
