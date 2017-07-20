@@ -199,7 +199,7 @@ function setGWAnalysisParams(_maq){
         pro = "http:";
     }
     var urls = pro+ "//192.168.35.231:81";
-    if(hrefs.indexOf("chat.gwfx.com")!=-1 ||  hrefs.indexOf("pmchat.24k.hk")!=-1){
+    if(hrefs.indexOf("chatadmin.gwfx.com")!=-1 ||  hrefs.indexOf("chatadmin.24k.hk")!=-1){
         urls = pro+ "//datac.gwghk.com";
     }
     img.src = urls+'/1.gif?' + args + '&dates='+new Date().getTime()+ '&';
