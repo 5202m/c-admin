@@ -796,10 +796,10 @@ var room = {
                 var size = dataList.length,
                     cls = '';
                 $('.point-list .point-list-content ul').html('');
-                if (dataList && dataList.result == 0 && dataList.data && size > 0) {
+                if (dataList && size > 0) {
                     var tearchPointHtml = '',
                         tearchPointFormat = room.formatHtml('point-list');
-                    $.each(dataList.data, function(key, row) {
+                    $.each(dataList, function(key, row) {
                         var detail = row.detailList[0];
                         if (key + 1 == size) {
                             cls = ' class="last"';
