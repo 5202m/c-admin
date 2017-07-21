@@ -36,6 +36,9 @@ var room = {
     init: function() {
         this.setSocket();
         this.setEvent();
+        this.getOnlineUserList();
+        this.getRoomChatMessageList();
+        noticeJS.init();
     },
     /**
      * 设置视频
@@ -46,18 +49,20 @@ var room = {
             $.getJSON('/getSyllabus?t=' + new Date().getTime(), { groupType: room.userInfo.groupType, groupId: room.userInfo.groupId }, function(data) {
                 var loc_html = null;
                 var course = common.getSyllabusPlan(data, new Date().getTime());
-                if (course.liveLink && course.liveLink.length > 0) {
-                    $.each(course.liveLink, function(i, row) {
-                        if (row.code == '1') {
-                            course.studioLink = row.url;
+                if(common.isValid(course)) {
+                    if (course.liveLink && course.liveLink.length > 0) {
+                        $.each(course.liveLink, function (i, row) {
+                            if (row.code == '1') {
+                                course.studioLink = row.url;
+                            }
+                        });
+                    }
+                    if (data && common.isValid(course.studioLink)) {
+                        if (/\.myqcloud\./.test(course.studioLink)) {
+                            room.playByQCloud('yyVideoDiv', course.studioLink, '', true);
+                        } else {
+                            obsPlayer.init(course.studioLink, 'yyVideoDiv', true);
                         }
-                    });
-                }
-                if (data && common.isValid(course.studioLink)) {
-                    if (/\.myqcloud\./.test(course.studioLink)) {
-                        room.playByQCloud('yyVideoDiv', course.studioLink, '', true);
-                    } else {
-                        obsPlayer.init(course.studioLink, 'yyVideoDiv', true);
                     }
                 }
             });
@@ -65,7 +70,6 @@ var room = {
             console.error("setVideo has error:" + e);
         }
     },
-
     /**
      * 使用腾讯云直播
      * @param $panel
@@ -73,21 +77,21 @@ var room = {
      * @param title
      * @param autostart
      */
-    playByQCloud: function($panel, url, title, autostart) {
+    playByQCloud: function($panel, url, title, autostart){
         LazyLoad.js(['//imgcache.qq.com/open/qcloud/video/vcplayer/TcPlayer-2.2.0.js'], function() {
             var options = {
-                "volume": 1,
-                "autoplay": autostart,
-                "width": '100%',
-                "height": '100%'
+                "volume" : 1,
+                "autoplay" : autostart,
+                "width" :  '100%',
+                "height" : '100%'
             };
-            if (/\.m3u8/.test(url)) {
+            if (/\.m3u8/.test(url)){
                 options.m3u8 = url;
-            } else {
+            }else{
                 options.flv = url;
             }
-            $('#' + $panel).empty();
-            var player = new TcPlayer($panel, options);
+            $('#'+$panel).empty();
+            var player =  new TcPlayer($panel, options);
         });
     },
     /**
@@ -105,22 +109,21 @@ var room = {
             $(".sender").html(fromUser.nickname);
             var talkContent = data.content.value;
             if (data.content.msgType == room.msgType.img) {
-                talkContent = '<a href="/getBigImg?publishTime=' + fromUser.publishTime + '&amp;userId=' + fromUser.userId + '" data-lightbox="dialog-img"><img src="' + data.content.value + '" /></a>';
+                talkContent = '<a href="/getBigImg?publishTime='+fromUser.publishTime+'&amp;userId='+fromUser.userId+'" data-lightbox="dialog-img"><img src="' + data.content.value + '" /></a>';
             }
             $(".xcont").html(talkContent);
-            $("#talk_top_id").prepend('<section class="ss-tk-info clearfix" tm="' + fromUser.publishTime + '"><div>' + room.formatPublishTime(fromUser.publishTime, true, '-') + '</div><label><strong>' + fromUser.nickname + '</strong>：</label><span style="margin-left:5px;text-align:justify;">' + talkContent + '</span><div><button type="button">关闭</button><button type="button" uid="' + fromUser.userId + '" utype="' + fromUser.userType + '" ' + (hasWh ? '' : 'style="display:none;"') + '" cg="' + fromUser.clientGroup + '" nk="' + fromUser.nickname + '" iswh="true">私聊</button><button type="button" uid="' + fromUser.userId + '" utype="' + fromUser.userType + '">回复</button></div></section>');
+            $("#talk_top_id").prepend('<section class="ss-tk-info clearfix" tm="' + fromUser.publishTime + '"><label><strong>' + fromUser.nickname + '</strong>：</label><span style="margin-left:5px;text-align:justify;">' + talkContent + '</span><button type="button">关闭</button><button type="button" uid="' + fromUser.userId + '" utype="' + fromUser.userType + '" ' + (hasWh ? '' : 'style="display:none;"') + '" cg="' + fromUser.clientGroup + '" nk="' + fromUser.nickname + '" iswh="true">私聊</button><button type="button" uid="' + fromUser.userId + '" utype="' + fromUser.userType + '">回复</button></section>');
             var pDom = $('#talk_top_id .ss-tk-info[tm=' + fromUser.publishTime + ']');
             pDom.find("button").click(function() {
-                var $this = $(this);
-                var tp = $this.parents(".ss-tk-info");
-                var fuId = $this.attr("uid");
-                var isWh = $this.attr('iswh');
+                var tp = $(this).parents(".ss-tk-info");
+                var fuId = $(this).attr("uid");
+                var isWh = $(this).attr('iswh');
                 var tm = tp.attr("tm");
                 if (common.isValid(fuId) && common.isBlank(isWh)) {
-                    var msgTxt = pDom.find("span").html();
-                    room.setDialog(null, fuId, tp.find("strong").addClass("reply-st").html(), $this.attr("ts"), $this.attr("utype"), tm, msgTxt); //设置对话
+                    var $this = $(this);
+                    room.setDialog(null, fuId, tp.find("strong").addClass("reply-st").html(), $this.attr("ts"), $this.attr("utype"), tm, $this.siblings("span").html()); //设置对话
                 } else if (common.isValid(isWh) && isWh) {
-                    room.setDialog($this.attr("cg"), fuId, $this.attr("nk"), '1', $this.attr("utype"), tm, ""); //设置对话
+                    room.setDialog($(this).attr("cg"), fuId, $(this).attr("nk"), '1', $(this).attr("utype"), tm, ""); //设置对话
                 } else {
                     tp.remove();
                     $("#show_top_btn strong,#top_num").text("【" + $("#talk_top_id .ss-tk-info").length + "】");
@@ -128,8 +131,8 @@ var room = {
                     if ($("#contentText .txt_dia[tm=" + tm + "]").length > 0) {
                         $("#contentText").html("");
                     }
-                    if ($('#talk_top_id .ss-tk-info').size() == 0 && $('.top-box').is(':visible')) {
-                        $('.top-box').addClass('dn'); //没有@ 消息时，自动关闭@消息框
+                    if($('#talk_top_id .ss-tk-info').size() == 0 && $('.top-box').is(':visible')){
+                        $('.top-box').addClass('dn');//没有@ 消息时，自动关闭@消息框
                     }
                 }
             });
@@ -221,16 +224,15 @@ var room = {
             return false;
         }
         sendObj.content = { msgType: room.msgType.text, value: msg };
-        //room.socket.emit('sendMsg',sendObj);//发送数据
         $.post(room.apiUrl + "/message/sendMsg", { data: sendObj }, function() {
-            console.log("ok");
+            console.log("sendWhMsg ok");
         });
         room.setWhHistory(sendObj);
         room.setWhContent(sendObj, true, false); //直接把数据填入内容栏
         txtObj.html(""); //清空内容
         var dasData = {
             groupId: room.userInfo.groupId,
-            userTel: room.userInfo.mobilePhone,
+            mobile: room.userInfo.mobilePhone,
             clientGroup: '',
             userName: room.userInfo.nickname,
             roomName: decodeURI(common.getUrlParam('roomName', true)),
@@ -433,7 +435,6 @@ var room = {
                         $(this).val("");
                     }, false);
                     //加载私聊信息
-                    //room.socket.emit("getWhMsg",{userType:room.userInfo.userType,groupId:room.userInfo.groupId,groupType:room.userInfo.groupType,userId:room.userInfo.userId,toUser:{userId:userId,userType:userType}});
                     var whMsgObj = {
                         userType: room.userInfo.userType,
                         groupId: room.userInfo.groupId,
@@ -549,7 +550,7 @@ var room = {
                 if (data.content.msgType == room.msgType.img) {
                     room.removeLoadDom(fromUser.publishTime); //去掉加载框
                     var liObj = $('#' + fromUser.publishTime + ' p');
-                    var url = data.content.needMax ? 'getBigImg?publishTime=' + fromUser.publishTime + '&userId=' + fromUser.userId : liObj.find("a img").attr("src");
+                    var url = data.content.needMax ? '/admin/getBigImg?publishTime=' + fromUser.publishTime + '&userId=' + fromUser.userId : liObj.find("a img").attr("src");
                     liObj.find('a[class=swipebox]').attr("href", url);
                 }
                 return;
@@ -580,7 +581,7 @@ var room = {
         var html = '';
         if (content.msgType == room.msgType.img) {
             if (content.needMax) {
-                pHtml = '<p><a href="getBigImg?publishTime=' + fromUser.publishTime + '&userId=' + fromUser.userId + '" class="swipebox"  data-lightbox="dialog-img"><img src="' + content.value + '" alt="图片"/></a>' + loadImgHtml + '</p>';
+                pHtml = '<p><a href="/getBigImg?publishTime=' + fromUser.publishTime + '&userId=' + fromUser.userId + '" class="swipebox"  data-lightbox="dialog-img"><img src="' + content.value + '" alt="图片"/></a>' + loadImgHtml + '</p>';
             } else {
                 pHtml = '<p><a href="' + content.value + '" class="swipebox"  data-lightbox="dialog-img"><img src="' + content.value + '" alt="图片" /></a>' + loadImgHtml + '</p>';
             }
@@ -792,7 +793,7 @@ var room = {
             $('.right-teacher .publish-point').addClass('dn');
             $('.point-list').removeClass('dn');
             room.getArticleList("trade_strategy_article", room.userInfo.groupId, 1, 1, 20, '{"createDate":"desc"}', room.userInfo.userId, function(dataList) {
-                var size = dataList.data.length,
+                var size = dataList.length,
                     cls = '';
                 $('.point-list .point-list-content ul').html('');
                 if (dataList && dataList.result == 0 && dataList.data && size > 0) {
@@ -825,7 +826,31 @@ var room = {
                 room.setTalkListScroll(true);
             }
         });
-
+        //审核操作类事件
+        $("#approveAllHandler button").click(function() {
+            var idArr = [],
+                fuIdArr = [];
+            $("#dialog_list .approve input:checked").each(function() {
+                var obj = $(this).parents("div");
+                idArr.push(obj.attr("id"));
+                var fObj = obj.attr("fuId");
+                var loc_isAdd = false;
+                for (var i = 0, lenI = fuIdArr.length; i < lenI; i++) {
+                    if (fObj === fuIdArr[i]) {
+                        loc_isAdd = true;
+                        break;
+                    }
+                }
+                if (!loc_isAdd) {
+                    fuIdArr.push(fObj);
+                }
+            });
+            if (idArr.length == 0) {
+                alert("请选择聊天记录！");
+                return false;
+            }
+            room.socket.emit('approvalMsg', { fromUser: room.userInfo, status: $(this).attr("btnType"), publishTimeArr: idArr, fuIdArr: fuIdArr });
+        });
         $("#approveCheckAll").click(function() {
             var isCheck = $(this).prop("checked");
             $("#dialog_list .approve input[type=checkbox]").each(function() {
@@ -940,16 +965,15 @@ var room = {
                         $(".mymsg,.mymsg em").hide();
                     }
                     sendObj.fromUser.toUser = toUser;
-                    //room.socket.emit('sendMsg', sendObj);//发送数据
                     $.post(room.apiUrl + "/message/sendMsg", { data: sendObj }, function() {
-                        console.log("ok");
+                        console.log("sendMsg ok");
                     });
                     room.setContent(sendObj, true, false); //直接把数据填入内容栏
                     //清空输入框
                     $("#whTxt").html(""); //清空内容
                     var dasData = {
                         groupId: room.userInfo.groupId,
-                        userTel: room.userInfo.mobilePhone,
+                        mobile: room.userInfo.mobilePhone,
                         clientGroup: '',
                         userName: room.userInfo.nickname,
                         roomName: decodeURI(common.getUrlParam('roomName', true)),
@@ -979,8 +1003,8 @@ var room = {
                     } else if (room.userInfo.userType == 3) {
                         dasData.clientGroup = 'cs'; //return "客服";
                     }
-                    if ($('#talk_top_id .ss-tk-info').size() == 0 && $('.top-box').is(':visible')) {
-                        $('.top-box').addClass('dn'); //没有@ 消息时，自动关闭@消息框
+                    if($('#talk_top_id .ss-tk-info').size() == 0 && $('.top-box').is(':visible')){
+                        $('.top-box').addClass('dn');//没有@ 消息时，自动关闭@消息框
                     }
                     chatAnalyze.setUTM(false, dasData);
                 }
@@ -1107,7 +1131,13 @@ var room = {
             $('.wh_tab_history_div').addClass('dn');
             return false;
         });
-
+        //公布值记录框显示隐藏事件
+        $("#close-push-top-box").click(function() {
+            $(".push-top-box").addClass('dn');
+        });
+        $("#pushNotice").click(function() {
+            $(".push-top-box").toggleClass('dn').draggable({ containment: ".main", scroll: false });
+        });
         /**
          * 搜索@记录
          */
@@ -1188,7 +1218,7 @@ var room = {
                             }
                         }]
                     };
-                    common.getJson('addArticle', { data: JSON.stringify(articleInfo), isNotice: "Y" }, function(result) {
+                    common.getJson('/addArticle', { data: JSON.stringify(articleInfo), isNotice: "Y" }, function(result) {
                         if (result.isOK) {
                             if (result.id) {
                                 room.showTipBox("发布课堂笔记成功！");
@@ -1313,9 +1343,6 @@ var room = {
      * 格式发布日期
      */
     formatPublishTime: function(time, isfull, splitChar) {
-        if (!time) {
-            time = "";
-        }
         var nb = Number(time.replace(/_.+/g, ""));
         return common.isBlank(time) ? '' : isfull ? common.formatterDateTime(nb, splitChar) : common.getHHMM(nb);
     },
@@ -1344,7 +1371,7 @@ var room = {
             } else {
                 $("#userGagForm input[name='memberId']").val(nickname);
                 var data = room.getUserGagData();
-                data.set['type'] = 'visitor_filter';
+                data.set.type = 'visitor_filter';
                 $('.not-talk').addClass('dn');
                 room.setUserGag(data.set, data.visitor);
             }
@@ -1397,7 +1424,7 @@ var room = {
             if (data.content.msgType == room.msgType.img) {
                 room.removeLoadDom(fromUser.publishTime); //去掉加载框
                 var aObj = $('#' + fromUser.publishTime + ' span[contt=a] a[class=min_img]');
-                var url = data.content.needMax ? 'getBigImg?publishTime=' + fromUser.publishTime + '&userId=' + fromUser.userId : aObj.children("img").attr("src");
+                var url = data.content.needMax ? '/getBigImg?publishTime=' + fromUser.publishTime + '&userId=' + fromUser.userId : aObj.children("img").attr("src");
                 aObj.attr("href", url);
             }
             this.removeTalkMsg(fromUser.publishTime); //移除聊天记录
@@ -1434,7 +1461,15 @@ var room = {
         $('#' + fromUser.publishTime + ' .txt_dia').click(function() {
             room.setDialog(null, $(this).attr("uid"), $(this).find("label").text(), 0, $(this).attr("utype"));
         });
-
+        //审核按钮事件
+        $('#' + fromUser.publishTime + " .approve button").click(function() {
+            var idArr = [],
+                fuIdArr = [];
+            var pObj = $(this).parents("div");
+            idArr.push(pObj.attr("id"));
+            fuIdArr.push(pObj.attr("fuId"));
+            room.socket.emit('approvalMsg', { fromUser: room.userInfo, status: $(this).attr("btnType"), publishTimeArr: idArr, fuIdArr: fuIdArr });
+        });
         this.removeTalkMsg(fromUser.publishTime); //移除聊天记录
     },
     /**
@@ -1447,7 +1482,7 @@ var room = {
         $('#' + ptime + " p .close").click(function() {
             if (confirm('确定删除该记录？')) {
                 var param = { publishTimeArr: [ptime], groupId: room.userInfo.groupId };
-                common.getJson('removeMsg', { data: JSON.stringify(param) }, function(data) {
+                common.getJson('/removeMsg', { data: JSON.stringify(param) }, function(data) {
                     if (data != null) {
                         if (data.isOK) {
                             room.showTipBox('删除聊天记录成功！');
@@ -1574,7 +1609,7 @@ var room = {
         if (content.msgType == room.msgType.img) {
             pStyle = 'style="display:block;max-width:150px;"';
             if (content.needMax) {
-                pHtml = '<span ' + pStyle + '><a href="getBigImg?publishTime=' + fromUser.publishTime + '&userId=' + fromUser.userId + '" data-lightbox="dialog-img"><img src="' + content.value + '" alt="图片"/></a>' + loadImgHtml + '</span>';
+                pHtml = '<span ' + pStyle + '><a href="/getBigImg?publishTime=' + fromUser.publishTime + '&userId=' + fromUser.userId + '" data-lightbox="dialog-img"><img src="' + content.value + '" alt="图片"/></a>' + loadImgHtml + '</span>';
             } else {
                 pHtml = '<span ' + pStyle + '><a href="' + content.value + '" class="min_img" data-lightbox="dialog-img"><img src="' + content.value + '" alt="图片" /></a>' + loadImgHtml + '</span>';
             }
@@ -1582,9 +1617,25 @@ var room = {
         } else {
             pHtml = content.value;
         }
-        var html = '<div class="' + cls + '" id="' + fromUser.publishTime + '" isMe="' + isMe + '" utype="' + fromUser.userType + '" mType="' + content.msgType + '" t="header">' +
-            '<a href="javascript:" class="headimg" uId="' + fromUser.userId + '">' + room.getUserAImgCls(fromUser.clientGroup, fromUser.userType, fromUser.avatar) + '</a><i></i>' +
-            '<p><a href="javascript:"  class="' + uName + '">' + nickname + '</a><span class="dtime">' + room.formatPublishTime(fromUser.publishTime) + '</span><a href="javascript:void(0);" class="close"></a>';
+        var html = '<div class="{class}" id="{publishTime}" isMe="{isMe}" utype="{userType}" mType="{msgType}" t="header">' +
+            '<a href="javascript:" class="headimg" uId="{userId}">{userAImg}</a><i></i>' +
+            '<p>' +
+            '<a href="javascript:"  class="{uName}">{nickname}</a>{userMark}' +
+            '<span class="dtime">{formattedPublishTime}</span>' +
+            '<a href="javascript:void(0);" class="close"></a>';
+        html = html.formatStr({
+            class: cls,
+            isMe: isMe,
+            publishTime: fromUser.publishTime,
+            formattedPublishTime: room.formatPublishTime(fromUser.publishTime),
+            userType: fromUser.userType,
+            userId: fromUser.userId,
+            msgType: content.msgType,
+            uName: uName,
+            nickname: nickname,
+            userMark: room.getUserMark(fromUser),
+            userAImg: room.getUserAImgCls(fromUser.clientGroup, fromUser.userType, fromUser.avatar)
+        });
         if (content.status == 0) { //需要审批
             html += '<span class="approve"><input type="checkbox"/><button btnType="1">通过</button><button btnType="2">拒绝</button></span>';
             $("#approveAllHandler").show();
@@ -1600,6 +1651,17 @@ var room = {
         }
         html += '</span></p>' + dialog + '</div>';
         return html;
+    },
+    getUserMark: function(userInfo) {
+        var clientGroup = userInfo.clientGroup || common.clientGroup.visitor;
+        if (["active", "notActive"].indexOf(clientGroup) < 0) {
+            return "";
+        }
+        var mark = clientGroup.slice(0, 1).toUpperCase();
+        return '<em class="mb-cls" title="{clientGroup}">({userMark})</em>'.formatStr({
+            userMark: mark,
+            clientGroup: clientGroup
+        });
     },
     /**
      * 格式链接
@@ -1648,7 +1710,7 @@ var room = {
         } else {
             aImgCls = "user_c";
         }
-        return '<img src="admin/img/' + aImgCls + '.png">';
+        return '<img src="/admin/img/' + aImgCls + '.png">';
     },
     /**
      * 提取对话html
@@ -1690,6 +1752,39 @@ var room = {
         } else {
             return '<div class="dialogbtn" style="display:none;" cg="' + clientGroup + '" nk="' + nickname + '" uId="' + userId + '" utype="' + userType + '"></div>';
         }
+    },
+    getOnlineUserList: function() {
+        $.get("/getRoomOnlineList", { groupType: room.userInfo.groupType, groupId: room.userInfo.groupId })
+            .done(this.handleOnlineUserList)
+            .always(function() {
+                room.setUserListClick($("#userListId li a[t=header]"));
+                $("#onLineSizeNum").text($('#userListId li').length);
+                room.setListScroll(".user_box");
+            });
+    },
+    handleOnlineUserList: function(data) {
+        $('#userListId').html("");
+        var row = null,
+            userArr = [];
+        data = room.sortUserList(data);
+        for (var i in data) {
+            row = data[i];
+            if (row.userType == 2) {
+                room.setOnlineUser(row);
+            } else {
+                userArr.push(room.getOnlineUserDom(row).dom); //设置在线用户
+            }
+        }
+        $('#userListId').append(userArr.join(""));
+    },
+    sortUserList: function(list) {
+        var currentUserId = room.userInfo.userId;
+        var sorter = function(userA, userB) {
+            var seqA = userA.userId === currentUserId ? 0 : userA.sequence;
+            var seqB = userB.userId === currentUserId ? 0 : userB.sequence;
+            return seqA > seqB;
+        };
+        return list.sort(sorter);
     },
     /**
      * 提取在线用户的dom
@@ -1793,7 +1888,6 @@ var room = {
             txt = '您的账号已在其他地方进入该房间，';
         }
         if (flag == "forcedOut") {
-            alert(userIds + room.userInfo.userId);
             var lenI = !userIds ? 0 : userIds.length;
             if (lenI > 0) {
                 for (var i = 0, lenI = !userIds ? 0 : userIds.length; i < lenI; i++) {
@@ -1813,44 +1907,6 @@ var room = {
             window.close();
         }, 3000);
     },
-    sortOnlineUserList: function(userList) {
-        var sysArr = [],
-            vipArr = [],
-            activeArr = [],
-            notActiveArr = [],
-            simulateArr = [],
-            registerArr = [],
-            visitorArr = [];
-        $.each(userList, function(i, user) {
-            user.userType = common.parseInt(user.userType);
-            if (user.userType > 0) {
-                sysArr.push(user);
-                return true;
-            }
-            if (user.clientGroup === common.clientGroup.vip) {
-                vipArr.push(user);
-                return true;
-            }
-            if (user.clientGroup === common.clientGroup.active) {
-                activeArr.push(user);
-                return true;
-            }
-            if (user.clientGroup === common.clientGroup.notActive) {
-                notActiveArr.push(user);
-                return true;
-            }
-            if (user.clientGroup === common.clientGroup.simulate) {
-                simulateArr.push(user);
-                return true;
-            }
-            if (user.clientGroup === common.clientGroup.register) {
-                registerArr.push(user);
-                return true;
-            }
-            visitorArr.push(user);
-        });
-        return sysArr.concat(vipArr, activeArr, notActiveArr, simulateArr, registerArr, visitorArr);
-    },
     /*
      * 设置socket
      */
@@ -1862,7 +1918,6 @@ var room = {
             //$(".loading-box").show();
             room.userInfo.socketId = room.socket.id;
             var currTab = $("#groupInfoId");
-            //room.socket.emit('login',{userInfo:room.userInfo,lastPublishTime:$("#content_ul li:last").attr("id"),fUserTypeStr:currTab.attr("awr"), allowWhisper : currTab.attr("aw")});
             var postData = {
                 userInfo: room.userInfo,
                 lastPublishTime: $("#content_ul li:last").attr("id"),
@@ -1870,35 +1925,13 @@ var room = {
                 allowWhisper: currTab.attr("aw")
             };
             $.post(room.apiUrl + "/message/join", postData, function() {
-                console.log("ok");
+                console.log("join ok");
             });
-            $(".img-loading[pf=chatMessage]").show();
         });
-        //进入聊天室加载的在线用户
-        this.socket.on('onlineUserList', function(data, dataSize) {
-            $('#userListId').html("");
-            var row = null,
-                userArr = [];
-            data = room.sortOnlineUserList(data);
-            for (var i in data) {
-                row = data[i];
-                //TODO, this need to be deleted after socket released next time.
-                row.userType = common.parseInt(row.userType);
-                if (row.userType == 2) {
-                    room.setOnlineUser(row);
-                } else {
-                    userArr.push(room.getOnlineUserDom(row).dom); //设置在线用户
-                }
-            }
-            $('#userListId').append(userArr.join(""));
-            room.setUserListClick($("#userListId li a[t=header]"));
-            $("#onLineSizeNum").text($('#userListId li').length);
-            room.setListScroll(".user_box");
-        });
+
         //断开连接
         this.socket.on('disconnect', function(e) {
             console.log('disconnect');
-            //room.socket.emit('login',room.userInfo);//重新链接
         });
         //出现异常
         this.socket.on("error", function(e) {
@@ -1926,8 +1959,6 @@ var room = {
                     {
                         var data = result.data,
                             userInfoTmp = data.onlineUserInfo;
-                        //TODO, this need to be deleted after socket released next time.
-                        userInfoTmp.userType = common.parseInt(userInfoTmp.userType);
                         if (data.online) {
                             room.setOnlineUser(userInfoTmp);
                         } else {
@@ -1994,24 +2025,6 @@ var room = {
                     }
             }
         });
-        //信息传输
-        this.socket.on('loadMsg', function(data) {
-            $(".img-loading[pf=chatMessage]").hide();
-            var msgData = data.msgData,
-                isAdd = data.isAdd;
-            if (!isAdd) {
-                $("#content_ul").html("");
-            }
-            if (msgData && $.isArray(msgData)) {
-                msgData.reverse();
-                for (var i in msgData) {
-                    var row = msgData[i];
-                    row.content.status = row.status;
-                    room.formatUserToContent(row);
-                }
-                room.setTalkListScroll(true);
-            }
-        });
         //加载私聊信息
         this.socket.on('loadWhMsg', function(result) {
             var data = result.data;
@@ -2039,6 +2052,27 @@ var room = {
                 }
             }
         });
+    },
+    getRoomChatMessageList: function() {
+        $("#chatMsgContentDiv .img-loading").show();
+        $.get("/loadMsg", {
+                groupId: room.userInfo.groupId,
+                groupType: room.userInfo.groupType,
+                userId: room.userInfo.userId
+            })
+            .done(this.handleRoomChatMessageList);
+    },
+    handleRoomChatMessageList: function(msgData) {
+        $("#chatMsgContentDiv .img-loading").hide();
+        if (msgData && $.isArray(msgData)) {
+            msgData.reverse();
+            for (var i in msgData) {
+                var row = msgData[i];
+                row.content.status = row.status;
+                room.formatUserToContent(row);
+            }
+            room.setTalkListScroll(true);
+        }
     },
     /**
      * 聊天记录数据转换
@@ -2164,7 +2198,7 @@ var room = {
                 authorInfo: { userId: room.userInfo.userId, name: room.userInfo.nickname, avatar: room.userInfo.avatar, position: room.userInfo.position }
             }]
         };
-        common.getJson('addArticle', { data: JSON.stringify(param) }, function(result) {
+        common.getJson('/addArticle', { data: JSON.stringify(param) }, function(result) {
             if (result.isOK) {
                 if (result.id > 0) {
                     room.showTipBox("观点发布成功！");
@@ -2319,9 +2353,7 @@ var room = {
         try {
             $.getJSON('getArticleList', { authorId: common.trim(authorId), code: code, platform: platform, hasContent: hasContent, pageNo: curPageNo, pageSize: pageSize, orderByStr: orderByStr }, function(data) {
                 //console.log("getArticleList->data:"+JSON.stringify(data));
-                if (data)
-                    callback({ result: 0, data: data });
-                else callback(null);
+                callback(data);
             });
         } catch (e) {
             console.error("getArticleList->" + e);

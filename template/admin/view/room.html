@@ -15,7 +15,6 @@
     <link rel="stylesheet" type="text/css" href="/base/lib/dateTimeWeek/dateTimeWeek.css" />
     <link rel="stylesheet" type="text/css" href="/admin/css/room<%=isDevTest? '.css' : ('.min.css?t=' + new Date().getTime())%>" />
     <script type="text/javascript" src="/base/lib/My97DatePicker/WdatePicker.js"></script>
-    <script type="text/javascript" src="/base/lib/lazyload/lazyload.min.js"></script>
 </head>
 
 <body>
@@ -124,6 +123,16 @@
             <div class="wh-right right-teacher">
                 <div class="rightTitle">
                     <strong>主讲人</strong>
+                    <% if (userType=='2') { %>
+                    <span class="pushNotice" id="pushNotice">公布值提醒</span>
+                    <% } %>
+                </div>
+                <div class="push-top-box dn">
+                    <div style="height: 20px;">
+                        <h3 style="float:left;">公布值记录：</h3><i id="close-push-top-box"></i>
+                    </div>
+                    <div class="cont" id="push_top_id" style="overflow-y: auto;height:290px;"></div>
+
                 </div>
                 <div class="teacher">
                     <div class="te_l">
@@ -280,6 +289,7 @@
     <script type="text/javascript" src="/base/lib/store.min.js"></script>
     <script type="text/javascript">
         function pageFun() {
+            var isNw = <%= isNw%>;
             room.filePath = '<%= filePath%>';
             room.apiUrl = '<%= apiUrl%>';
             room.userInfo = JSON.parse('<%- userInfo %>');
@@ -293,7 +303,7 @@
              * 分析师后台添加追踪数据
              * @type {string}
              */
-           var clientGroup = "analyst";
+            var clientGroup = "analyst";
             if (room.userInfo.userType == 1) {
                 clientGroup = 'admin'; //return "管理员";
             } else if (room.userInfo.userType == 2) {
@@ -313,43 +323,39 @@
                 'positionFromTop': 50,
                 'albumLabel': "%1 of %2"
             });
-            <%if(isNw){%>
-            try {
-                var gui = require('nw.gui');
-                room.nwWin = gui.Window.get();
-                room.nwWin.resizeTo(940, 780);
-                room.nwWin.setMinimumSize(900, 580);
-                room.nwWin.moveTo(300, 30);
-                room.nwWin.on('minimize', function() {
-                    room.nwWin.setAlwaysOnTop(false);
-                    room.nwIsMinimize = true;
-                });
-                room.nwTray = new gui.Tray({
-                    title: room.roomName,
-                    icon: 'icon.png'
-                });
-                room.nwTray.on('click', function() {
-                    room.nwWin.setAlwaysOnTop(true);
-                    room.nwWin.show();
-                    room.nwWin.setAlwaysOnTop(false);
-                });
-                room.nwWin.on('close', function() {
-                    room.nwTray.remove();
-                    room.nwTray = null;
-                    this.close(true);
-                });
-                chatAnalyze.dasUrl = '<%= dasUrl%>';
-            } catch (e) {
-                console.log(e.message);
-            }
-            <%}else{%>
-            room.rmWin = this.window;
-            <%}%>
+            if (isNw)
+                try {
+                    var gui = require('nw.gui');
+                    room.nwWin = gui.Window.get();
+                    room.nwWin.resizeTo(940, 780);
+                    room.nwWin.setMinimumSize(900, 580);
+                    room.nwWin.moveTo(300, 30);
+                    room.nwWin.on('minimize', function() {
+                        room.nwWin.setAlwaysOnTop(false);
+                        room.nwIsMinimize = true;
+                    });
+                    room.nwTray = new gui.Tray({
+                        title: room.roomName,
+                        icon: 'icon.png'
+                    });
+                    room.nwTray.on('click', function() {
+                        room.nwWin.setAlwaysOnTop(true);
+                        room.nwWin.show();
+                        room.nwWin.setAlwaysOnTop(false);
+                    });
+                    room.nwWin.on('close', function() {
+                        room.nwTray.remove();
+                        room.nwTray = null;
+                        this.close(true);
+                    });
+                } catch (e) {
+                    console.log(e.message);
+                }
+            else
+                room.rmWin = this.window;
         }
-
-
     </script>
-    <%if(isDevTest) {%>
+    <% if(isDevTest) { %>
         <script type="text/javascript" src="/base/lib/jquery-1.11.0.min.js"></script>
         <script type="text/javascript" src="/base/lib/mScroll/jquery.mCustomScrollbar.concat.min.js"></script>
         <script type="text/javascript" src="/base/lib/lightbox/lightbox.min.js"></script>
@@ -364,15 +370,13 @@
         <script type="text/javascript" src="/base/lib/ueditor/lang/zh-cn/zh-cn.js"></script>
         <script type="text/javascript" src="/base/lib/dateTimeWeek/dateTimeWeek.js"></script>
         <script type="text/javascript" src="/base/util/common.js"></script>
-        <script type="text/javascript" src="/base/util/gwanalysis.js"></script>
         <script type="text/javascript" src="/base/util/chatAnalyze.js"></script>
         <script type="text/javascript" src="/admin/js/room.js"></script>
+        <script type="text/javascript" src="/admin/js/notice.js"></script>
         <script type="text/javascript">
-            $(function() {
-                pageFun();
-            });
+            $(pageFun);
         </script>
-        <%} else{ %>
+        <% }else{ %>
             <script type="text/javascript" src="/base/lib/basket.min.js"></script>
             <script type="text/javascript">
                 basket.version = '<%=version%>';
@@ -389,11 +393,11 @@
                     }, {
                         url: "/base/lib/pnotify/pnotify.custom.min.js"
                     }, {
-                        url: "/base/lib/jquery.face.js"
-                    }, {
                         url: "/base/lib/jqueryUI/jquery-ui.min.js"
                     }, {
                         url: "/base/lib/obsplayer/obsplayer.min.js"
+                    }, {
+                        url: "/base/lib/jquery.face.js"
                     }, {
                         url: "/base/lib/ueditor/ueditor.config.js"
                     }, {
@@ -405,7 +409,7 @@
                     }, {
                         url: "/base/util/common.min.js"
                     }, {
-                        url: "/admin/js/room.min.js?v=<%=version%>"
+                        url: "/admin/js/room.min.js"
                     },
                     function() { //ie版本不做本地缓存操作
                         pageFun();
@@ -413,6 +417,7 @@
                     pageFun();
                 });
             </script>
+
             <%}%>
 </body>
 
