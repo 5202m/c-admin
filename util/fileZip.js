@@ -82,7 +82,7 @@ var fileList = [
     { "out": "\\template\\admin\\static\\css\\index.min.css", "in": ["\\template\\admin\\static\\css\\index.css"] },
     { "out": "\\template\\admin\\static\\css\\room.min.css", "in": ["\\template\\admin\\static\\css\\room.css"] },
     { "out": "\\template\\admin\\static\\js\\index.min.js", "marge": false, "in": ["\\template\\admin\\static\\js\\index.js"] },
-    { "out": "\\template\\admin\\static\\js\\room.min.js", "marge": false, "in": ["\\template\\admin\\static\\js\\room.js", "\\template\\base\\util\\gwanalysis.js", "\\template\\base\\util\\chatAnalyze.js"] },
+    { "out": "\\template\\admin\\static\\js\\room.min.js", "marge": false, "in": ["\\template\\admin\\static\\js\\room.js", "\\template\\admin\\static\\js\\notice.js", "\\template\\base\\util\\gwanalysis.js", "\\template\\base\\util\\chatAnalyze.js"] },
 
     // COMMON
     { "out": "\\template\\base\\util\\common.min.js", "marge": false, "in": ["\\template\\base\\util\\common.js"] }
