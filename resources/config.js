@@ -28,7 +28,7 @@ var config = {
     redisUrlObj: { host: '192.168.35.81', port: 6379 }, //链接redis缓存客户端连接
     isAllowCopyHomeUrl: true, //是否允许copy链接（针对微信进入聊天室）
     //    apiUrl:'http://192.168.35.91:3000/api',//pmApi地址
-    apiUrl: 'http://192.168.35.81:3006/api', //pmApi地址
+    apiUrl: 'http://192.168.35.81:3004/api', //pmApi地址
     //   apiUrl:'http://localhost:3000/api',//pmApi地址
     apiAuth: {
         appId: "fx_chat",
@@ -59,7 +59,10 @@ var config = {
         rgsUrl: 'http://192.168.35.17:8080/rgs/validate', //UAT //'http://sso.24k.hk:8080/rgs/validate',//真实场
         clientId: 'fxlivebroadcast',
         rgsKey: 'b09a9317x9f18x4f11xb27dx2388e3223afb'
-    } //app端自动登录直播间
+    }, //app端自动登录直播间
+    // gwAnalysisServer: "datac.gwghk.com" // 真实场用这个
+    gwAnalysisServer: "192.168.35.231:81"
+
 };
 //导出配置类
 module.exports = config;

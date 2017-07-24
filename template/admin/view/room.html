@@ -259,7 +259,7 @@
                     </div>
                     <!--div class="mod_bottom_div" style="width:100%;height:auto;margin-left:5px;background-color: rgba(246,246,246,0.9);"></div-->
                 </div>
-        <div class="clear"></div>
+                <div class="clear"></div>
     </div>
     <div class="blackbg dn"></div>
     <!-- 通用提示框 -->
@@ -285,14 +285,16 @@
             room.userInfo = JSON.parse('<%- userInfo %>');
             room.socketUrl = JSON.parse('<%- socketUrl %>');
             room.roomName = '<%=roomName%>';
+            room.gwAnalysisServer = '<%=gwAnalysisServer%>';
             room.init(); //初始化
             room.widthCheck();
             room.heightCalcu();
+            var setGWAnalysisParams = initGWAnalysis(room.gwAnalysisServer || "datac.gwghk.com");
             /**
              * 分析师后台添加追踪数据
              * @type {string}
              */
-           var clientGroup = "analyst";
+            var clientGroup = "analyst";
             if (room.userInfo.userType == 1) {
                 clientGroup = 'admin'; //return "管理员";
             } else if (room.userInfo.userType == 2) {
@@ -300,7 +302,12 @@
             } else if (room.userInfo.userType == 3) {
                 clientGroup = 'cs'; //return "客服";
             }
-            chatAnalyze.setUTM(false, $.extend({operationType: 2,clientGroup:clientGroup,userTel:room.userInfo.mobilePhone,roomName:room.roomName}, room.userInfo));
+            chatAnalyze.setUTM(false, $.extend({
+                operationType: 2,
+                clientGroup: clientGroup,
+                userTel: room.userInfo.mobilePhone,
+                roomName: room.roomName
+            }, room.userInfo));
             $(window).resize(function(e) {
                 room.widthCheck(true);
                 room.heightCalcu(true);
@@ -345,8 +352,6 @@
             room.rmWin = this.window;
             <%}%>
         }
-
-
     </script>
     <%if(isDevTest) {%>
         <script type="text/javascript" src="/base/lib/jquery-1.11.0.min.js"></script>
