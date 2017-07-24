@@ -1907,6 +1907,44 @@ var room = {
             window.close();
         }, 3000);
     },
+    sortOnlineUserList: function(userList) {
+        var sysArr = [],
+            vipArr = [],
+            activeArr = [],
+            notActiveArr = [],
+            simulateArr = [],
+            registerArr = [],
+            visitorArr = [];
+        $.each(userList, function(i, user) {
+            user.userType = common.parseInt(user.userType);
+            if (user.userType > 0) {
+                sysArr.push(user);
+                return true;
+            }
+            if (user.clientGroup === common.clientGroup.vip) {
+                vipArr.push(user);
+                return true;
+            }
+            if (user.clientGroup === common.clientGroup.active) {
+                activeArr.push(user);
+                return true;
+            }
+            if (user.clientGroup === common.clientGroup.notActive) {
+                notActiveArr.push(user);
+                return true;
+            }
+            if (user.clientGroup === common.clientGroup.simulate) {
+                simulateArr.push(user);
+                return true;
+            }
+            if (user.clientGroup === common.clientGroup.register) {
+                registerArr.push(user);
+                return true;
+            }
+            visitorArr.push(user);
+        });
+        return sysArr.concat(vipArr, activeArr, notActiveArr, simulateArr, registerArr, visitorArr);
+    },
     /*
      * 设置socket
      */
@@ -1927,6 +1965,27 @@ var room = {
             $.post(room.apiUrl + "/message/join", postData, function() {
                 console.log("join ok");
             });
+        });
+        //进入聊天室加载的在线用户
+        this.socket.on('onlineUserList', function(data, dataSize) {
+            $('#userListId').html("");
+            var row = null,
+                userArr = [];
+            data = room.sortOnlineUserList(data);
+            for (var i in data) {
+                row = data[i];
+                //TODO, this need to be deleted after socket released next time.
+                row.userType = common.parseInt(row.userType);
+                if (row.userType == 2) {
+                    room.setOnlineUser(row);
+                } else {
+                    userArr.push(room.getOnlineUserDom(row).dom); //设置在线用户
+                }
+            }
+            $('#userListId').append(userArr.join(""));
+            room.setUserListClick($("#userListId li a[t=header]"));
+            $("#onLineSizeNum").text($('#userListId li').length);
+            room.setListScroll(".user_box");
         });
 
         //断开连接
