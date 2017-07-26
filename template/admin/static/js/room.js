@@ -78,21 +78,28 @@ var room = {
      * @param autostart
      */
     playByQCloud: function($panel, url, title, autostart){
-        LazyLoad.js(['//imgcache.qq.com/open/qcloud/video/vcplayer/TcPlayer-2.2.0.js'], function() {
-            var options = {
-                "volume" : 1,
-                "autoplay" : autostart,
-                "width" :  '100%',
-                "height" : '100%'
-            };
-            if (/\.m3u8/.test(url)){
-                options.m3u8 = url;
-            }else{
-                options.flv = url;
-            }
-            $('#'+$panel).empty();
-            var player =  new TcPlayer($panel, options);
-        });
+        $('#'+$panel).empty();
+        var options = {
+            "volume":1,
+            "autoplay" : autostart,
+            "width" :  '100%',
+            "height" : '100%'
+        };
+        var hdsdUrl = common.getVideoHDSDUrl(url);
+        if (/\.m3u8/.test(url)){
+            options.m3u8 = url;
+            options.m3u8_hd = hdsdUrl.hd;
+            options.m3u8_sd = hdsdUrl.sd;
+        }else if(/rtmp/.test(url)){
+            options.rtmp = url;
+            options.rtmp_hd = hdsdUrl.hd;
+            options.rtmp_sd = hdsdUrl.sd;
+        }else{
+            options.flv = url;
+            options.flv_hd = hdsdUrl.hd;
+            options.flv_sd = hdsdUrl.sd;
+        }
+        var player =  new TcPlayer($panel, options);
     },
     /**
      * @记录列表显示

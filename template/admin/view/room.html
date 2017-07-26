@@ -123,7 +123,7 @@
             <div class="wh-right right-teacher">
                 <div class="rightTitle">
                     <strong>主讲人</strong>
-                    <% if (userType=='2') { %>
+                    <% if (userType=='2' || userType=='1') { %>
                         <span class="pushNotice" id="pushNotice">公布值提醒</span>
                         <% } %>
                 </div>
@@ -286,6 +286,7 @@
     </section>
     <div class="clear"></div>
     </div>
+    <script src="//imgcache.qq.com/open/qcloud/video/vcplayer/TcPlayer-2.2.0.js" charset="utf-8"></script>
     <script type="text/javascript" src="/base/lib/store.min.js"></script>
     <script type="text/javascript">
         function pageFun() {
