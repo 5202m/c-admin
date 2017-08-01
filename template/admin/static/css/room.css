@@ -3781,5 +3781,16 @@ table.tableForm_C {
 .searchAtLog {width: 185px;border: 1px solid #e3e4ea;height: 22px;}
 .searchSpan a em {position: absolute;right: 110px;top: 2px;width: 23px;height: 22px;background-image: url(../img/search.png);}
 
+.wh-left .visitorDiv ul li .refresh {
+    background-image: url(../img/refresh.png);
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    display: block;
+    float: right;
+    margin-top: -9px;
+    margin-right: -5px;
+}
+
 .clear {clear:both;}
 

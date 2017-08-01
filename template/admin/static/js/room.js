@@ -351,7 +351,7 @@ var room = {
     setWhVisitors: function(userType, clientGroup, userId, nickname, isOnline, isShowNum) {
         if ($(".visitorDiv .wh_tab_ul li[uid=" + userId + "]").length == 0) {
             var isMb = $("#userListId li[id='" + userId + "']").attr('ismb');
-            $(".visitorDiv .wh_tab_ul").append('<li uid="' + userId + '"  ' + (isOnline ? '' : 'class="off"') + ' utype="' + userType + '"><span  class="user-row"><label>' + nickname + '</label><em class="close ym" t="0"></em><em class="mb">' + (isMb == "true" ? '(mb)' : '') + '</em><em class="wrtip">' + room.getWhUserCGTip(userType, clientGroup) + '</em></span></li>');
+            $(".visitorDiv .wh_tab_ul").append('<li uid="' + userId + '"  ' + (isOnline ? '' : 'class="off"') + ' utype="' + userType + '"><span  class="user-row"><label>' + nickname + '</label><em class="close ym" t="0"></em><em class="mb">' + (isMb == "true" ? '(mb)' : '') + '</em><em class="refresh"></em><em class="wrtip">' + room.getWhUserCGTip(userType, clientGroup) + '</em></span></li>');
             room.setListScroll($('.visitorDiv .wh_tab_div'), { scrollbarPosition: "outside" });
             var liDom = $('.visitorDiv .wh_tab_ul li[uid=' + userId + ']');
             if (isShowNum) {
@@ -359,6 +359,17 @@ var room = {
                     num = parseInt(numDom.attr("t")) + 1;
                 numDom.attr("t", num).text(num).addClass('ym');
             }
+            //私聊消息请求体
+            var whMsgObj = {
+                userType: room.userInfo.userType,
+                groupId: room.userInfo.groupId,
+                groupType: room.userInfo.groupType,
+                userId: room.userInfo.userId,
+                toUser: {
+                    userId: userId,
+                    userType: userType
+                }
+            };
             liDom.find('.close').click(function() {
                 var pt = $(this).parent().parent();
                 var isOn = pt.hasClass("on");
@@ -371,6 +382,12 @@ var room = {
                 if (whTabli.length == 0) {
                     $(".visitorDiv .pub_tab_ul li").click();
                 }
+            });
+            liDom.find('.refresh').click(function(){
+                var userId = liDom.attr("uid"),
+                    whId = 'wh_msg_' + userId;
+                room.getWhMsg(whMsgObj);
+                room.setTalkListScroll(true, $('#' + whId + ' .wh-content'), 'dark');
             });
             liDom.click(function() {
                 $(".wh_msg_only").show();
@@ -442,22 +459,7 @@ var room = {
                         $(this).val("");
                     }, false);
                     //加载私聊信息
-                    var whMsgObj = {
-                        userType: room.userInfo.userType,
-                        groupId: room.userInfo.groupId,
-                        groupType: room.userInfo.groupType,
-                        userId: room.userInfo.userId,
-                        toUser: {
-                            userId: userId,
-                            userType: userType
-                        }
-                    };
-                    $.post(
-                        room.apiUrl + "/message/getWhMsg", { data: whMsgObj },
-                        function() {
-                            console.log("ok");
-                        }
-                    );
+                    room.getWhMsg(whMsgObj);
                 } else {
                     $("#" + whId).removeClass('dn');
                     room.setTalkListScroll(true, $('#' + whId + ' .wh-content'), 'dark');
@@ -2109,6 +2111,9 @@ var room = {
                     data.reverse();
                     for (var i in data) {
                         row = data[i];
+                        if($('#'+row.publishTime).length > 0){
+                            continue;
+                        }
                         room.formatUserToContent(row, true, result.toUserId);
                         if (row.content.msgType == room.msgType.img) {
                             hasImg++;
@@ -2544,6 +2549,18 @@ var room = {
         } else {
             $('#userListId li').show();
         }
+    },
+    /**
+     * 获取私聊消息记录
+     * @param whMsgObj
+     */
+    getWhMsg: function(whMsgObj){
+        $.post(
+            room.apiUrl + "/message/getWhMsg", { data: whMsgObj },
+            function() {
+                console.log("ok");
+            }
+        );
     },
     /**
      * 获取私聊人员历史记录
