@@ -359,17 +359,6 @@ var room = {
                     num = parseInt(numDom.attr("t")) + 1;
                 numDom.attr("t", num).text(num).addClass('ym');
             }
-            //私聊消息请求体
-            var whMsgObj = {
-                userType: room.userInfo.userType,
-                groupId: room.userInfo.groupId,
-                groupType: room.userInfo.groupType,
-                userId: room.userInfo.userId,
-                toUser: {
-                    userId: userId,
-                    userType: userType
-                }
-            };
             liDom.find('.close').click(function() {
                 var pt = $(this).parent().parent();
                 var isOn = pt.hasClass("on");
@@ -385,7 +374,18 @@ var room = {
             });
             liDom.find('.refresh').click(function(){
                 var userId = liDom.attr("uid"),
-                    whId = 'wh_msg_' + userId;
+                    whId = 'wh_msg_' + userId,
+                    userType = liDom.attr('utype');
+                var whMsgObj = {
+                    userType: room.userInfo.userType,
+                    groupId: room.userInfo.groupId,
+                    groupType: room.userInfo.groupType,
+                    userId: room.userInfo.userId,
+                    toUser: {
+                        userId: userId,
+                        userType: userType
+                    }
+                };
                 room.getWhMsg(whMsgObj);
                 room.setTalkListScroll(true, $('#' + whId + ' .wh-content'), 'dark');
             });
@@ -459,6 +459,16 @@ var room = {
                         $(this).val("");
                     }, false);
                     //加载私聊信息
+                    var whMsgObj = {
+                        userType: room.userInfo.userType,
+                        groupId: room.userInfo.groupId,
+                        groupType: room.userInfo.groupType,
+                        userId: room.userInfo.userId,
+                        toUser: {
+                            userId: userId,
+                            userType: userType
+                        }
+                    };
                     room.getWhMsg(whMsgObj);
                 } else {
                     $("#" + whId).removeClass('dn');
